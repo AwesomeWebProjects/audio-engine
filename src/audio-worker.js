@@ -1,26 +1,19 @@
-import type { StreamParams } from './types';
-
 const INITIAL_STREAM_AMOUNT = 1245184;
 const FALLBACK_CHUNK_LIMIT = 65536 * 5;
 
-let audioStreamData: { response: Response; contentLength: string } | null =
-  null;
+let audioStreamData = null;
 let playingFullMusic = false;
 
-function readAudioStream(
-  response: Response,
-  contentLength: string,
-  params: StreamParams,
-): ReadableStream<Uint8Array> {
+function readAudioStream(response, contentLength, params) {
   const total = parseInt(contentLength, 10);
   let loaded = 0;
   const startedStream = Date.now();
 
   return new ReadableStream({
     start(controller) {
-      const reader = response.body!.getReader();
+      const reader = response.body.getReader();
 
-      const read = (): void => {
+      const read = () => {
         reader
           .read()
           .then(({ done, value }) => {
@@ -66,7 +59,7 @@ function readAudioStream(
   });
 }
 
-async function fetchSong(url: string): Promise<void> {
+async function fetchSong(url) {
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -103,7 +96,7 @@ async function fetchSong(url: string): Promise<void> {
   });
 }
 
-async function preloadSong(): Promise<void> {
+async function preloadSong() {
   if (!audioStreamData) return;
 
   const stream = readAudioStream(
@@ -122,7 +115,7 @@ async function preloadSong(): Promise<void> {
   });
 }
 
-self.onmessage = (event: MessageEvent) => {
+self.onmessage = (event) => {
   const { type, data } = event.data;
   playingFullMusic = data.playingFullMusic;
 

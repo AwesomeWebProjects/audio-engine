@@ -250,8 +250,23 @@ export class PlayerController extends EventEmitter<PlayerControllerEvents> {
   }
 
   private initWorker(): void {
-    const url = this.workerURL ?? new URL('./audio-worker.ts', import.meta.url);
-    const worker = new Worker(url, { type: 'module' });
+    const rawUrl = this.workerURL ?? new URL('./audio-worker.js', import.meta.url);
+    let workerUrl: string | URL = rawUrl;
+
+    // When bundled (e.g. Vite library mode), the worker file gets inlined as a
+    // data URL. Data URL workers have an opaque (null) origin and cannot make
+    // same-origin fetch requests. Convert to a blob URL which inherits the
+    // document's origin.
+    if (rawUrl instanceof URL && rawUrl.protocol === 'data:') {
+      const dataStr = rawUrl.href;
+      const commaIndex = dataStr.indexOf(',');
+      const base64 = dataStr.substring(commaIndex + 1);
+      const code = atob(base64);
+      const blob = new Blob([code], { type: 'text/javascript' });
+      workerUrl = URL.createObjectURL(blob);
+    }
+
+    const worker = new Worker(workerUrl);
 
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
       const { response, actionType, playingFullMusic } = event.data;
