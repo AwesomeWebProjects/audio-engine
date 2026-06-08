@@ -4,6 +4,9 @@
   "description": "Framework-agnostic audio engine powered by the Web Audio API. Streaming, playlist management, and visualization support.",
   "author": "Daniel Barion (https://github.com/danielbarion)",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/audio-engine.cjs",
   "module": "./dist/audio-engine.js",
